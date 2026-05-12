@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  pokebot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pokebot
+    restart: unless-stopped
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-45}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - HEADLESS=true
+    # Chromium inside Docker needs these to avoid sandboxing issues
+    security_opt:
+      - seccomp=unconfined
+    shm_size: "256mb"
+    volumes:
+      - pokebot_data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pokebot_data:
