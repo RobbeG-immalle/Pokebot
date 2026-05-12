@@ -51,13 +51,15 @@ export async function getBrowserContext(): Promise<BrowserContext> {
       javaScriptEnabled: true,
     });
 
-    // Hide automation fingerprints
+    // Hide automation fingerprints (runs inside the browser page context)
     await context.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
-      Object.defineProperty(navigator, 'languages', { get: () => ['nl-BE', 'nl', 'en-US'] });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).chrome = { runtime: {} };
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const g = globalThis as any;
+      Object.defineProperty(g.navigator, 'webdriver', { get: () => undefined });
+      Object.defineProperty(g.navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+      Object.defineProperty(g.navigator, 'languages', { get: () => ['nl-BE', 'nl', 'en-US'] });
+      g.chrome = { runtime: {} };
+      /* eslint-enable @typescript-eslint/no-explicit-any */
     });
   }
 
